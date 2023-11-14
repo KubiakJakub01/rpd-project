@@ -14,9 +14,9 @@ public class StockDataController {
     private StockDataService stockDataService;
 
     @GetMapping("/fetchAndSendStockData/{symbol}")
-    public ResponseEntity<Map<String, Object>> fetchAndSendStockData(@PathVariable String symbol) {
+    public String  fetchAndSendStockData(@PathVariable String symbol) {
         Map<String, Object> stockData = stockDataService.processAndSendStockData(symbol);
-        return ResponseEntity.ok(stockData);
+        return "Data processed and sent for " + symbol;
     }
 }
 
