@@ -1,11 +1,13 @@
-package com.app.service;
+package com.app.service.producer;
 
-import com.app.service.producer.KafkaStockProducerService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Service
@@ -27,20 +29,21 @@ public class CsvKafkaProducer {
 
     private String convertRecordToJson(String line){
         String[] csvValues = line.split(",");
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("timestamp", csvValues[0]);
-            jsonObject.put("open", csvValues[1]);
-            jsonObject.put("high", csvValues[2]);
-            jsonObject.put("low", csvValues[3]);
-            jsonObject.put("close", csvValues[4]);
-            jsonObject.put("volume", csvValues[5]);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        // Convert the JSON object to a string
-        return jsonObject.toString();
+        Map<String, String> map = new HashMap<>();
+        map.put("timestamp", csvValues[0]);
+        map.put("open", csvValues[1]);
+        map.put("high", csvValues[2]);
+        map.put("low", csvValues[3]);
+        map.put("close", csvValues[4]);
+        map.put("volume", csvValues[5]);
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(map);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }
