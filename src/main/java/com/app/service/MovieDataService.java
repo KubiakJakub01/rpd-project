@@ -1,51 +1,36 @@
 package com.app.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 
 @Service
-public class StockDataService {
+public class MovieDataService {
 
     @Autowired
-    private AlphaVantageService alphaVantageService;
+    private OmdbService omdbService;
 
     @Autowired
     private KafkaStockProducerService kafkaStockProducerService;
 
-    // default method without month
-    public Map<String, Object> processAndSendStockData(String symbol) {
-        // Fetch data
-        Map<String, Object> stockData = alphaVantageService.getDailyTimeSeries(symbol);
-
-        // Process data (optional, depending on your use case)
-        String processedData = processStockData(stockData);
-
-        // Send data to Kafka
-        kafkaStockProducerService.sendStockData(symbol, processedData);
-
-        // Return the fetched data
-        return stockData;
-    }
-
     // overloaded method for writing to kafka topic with month
-    public Map<String, Object> processAndSendStockData(String symbol,String month) {
+    public Map<String, Object> processAndSendMovieData(String movie,String year) {
         // Fetch data
-        Map<String, Object> stockData = alphaVantageService.getDailyTimeSeries(symbol,month);
+        Map<String, Object> movieData = omdbService.getMovieOfTheYear(movie,year);
 
         // Process data (optional, depending on your use case)
-        String processedData = processStockData(stockData);
+        String processedData = processMovieData(movieData);
 
         // Send data to Kafka
-        kafkaStockProducerService.sendStockData(symbol, processedData);
+        kafkaStockProducerService.sendStockData(movie, processedData);
 
         // Return the fetched data
-        return stockData;
+        return movieData;
     }
 
-    private String processStockData(Map<String, Object> stockData) {
+    private String processMovieData(Map<String, Object> stockData) {
         // Implement your data processing logic here
         // For example, converting the Map to a JSON string
         return convertMapToJsonString(stockData);

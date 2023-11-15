@@ -10,7 +10,7 @@ public class KafkaStockProducerService {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    private final String topicName = "test_topic"; // Replace with your Kafka topic
+    private final String topicName = "movie_topic"; // Replace with your Kafka topic
 
     public void sendStockData(String symbol, String data) {
         kafkaTemplate.send(topicName, symbol, data);

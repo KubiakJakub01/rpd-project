@@ -19,10 +19,19 @@ public class AlphaVantageService {
 
     public Map<String, Object> getDailyTimeSeries(String symbol) {
         String url = String.format(
-                "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=%s&apikey=%s",
+                "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=%s&apikey=%s",
                 symbol, apiKey);
         return restTemplate.getForObject(url, Map.class);
     }
+
+    public Map<String, Object> getDailyTimeSeries(String symbol,String month) {
+        String url = String.format(
+                "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=%s&apikey=%s&" +
+                        "interval=60min&month=%s",
+                symbol, apiKey,month);
+        return restTemplate.getForObject(url, Map.class);
+    }
+
 }
 
 
