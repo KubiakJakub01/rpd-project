@@ -57,6 +57,7 @@ public class HistoricalDataKafkaConsumer {
                 for (ConsumerRecord<String, String> record : records) {
                     // Generate a unique object name for MinIO (e.g., using record offset)
                     String objectName = "historical-data-" + record.topic() + "-" + record.partition() + "-" + record.offset();
+                    System.out.println("consumed csv message "+objectName);
                     // Upload the record to MinIO
                     minioService.uploadString("windows-csv-data", objectName, record.value());
                 }

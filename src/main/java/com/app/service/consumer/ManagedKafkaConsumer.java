@@ -55,6 +55,7 @@ public class ManagedKafkaConsumer {
                     // Generate a unique object name for MinIO (e.g., using record offset)
                     String objectName = "realtime-data-" + record.topic() + "-" + record.partition() + "-" + record.offset();
 
+                    System.out.println("Consumed "+objectName);
                     // Upload the record to MinIO
                     minioService.uploadString("windows-realtime-data", objectName, record.value());
                 }

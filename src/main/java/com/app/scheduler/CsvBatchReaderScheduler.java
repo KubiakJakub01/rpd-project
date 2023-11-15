@@ -1,6 +1,6 @@
 package com.app.scheduler;
 
-import com.app.service.producer.CsvKafkaProducer;
+import com.app.service.CsvKafkaProducer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ public class CsvBatchReaderScheduler {
 
     @Scheduled(fixedRate = 60000) // Runs every minute
     public void processCsvBatch() {
-        String filePath = "src/main/resources/static/intraday_1min_IBM.csv"; // Set your CSV file path
+        String filePath = "/stock_data/weekly_IBM.csv"; // Set your CSV file path
         String symbol = extractSymbolFromFilename(filePath);
 
         try {

@@ -27,7 +27,7 @@ public class MovieDataService {
 
         // Process data
         String processedData = processMovieData(movieData);
-
+        System.out.println("Producer written to realtime msg: "+processedData);
         // Send data to Kafka
         kafkaStockProducerService.sendStockData(topicName,movie, processedData);
 
