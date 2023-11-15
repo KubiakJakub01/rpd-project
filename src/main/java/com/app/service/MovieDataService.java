@@ -1,13 +1,18 @@
 package com.app.service;
 
+import com.app.service.producer.KafkaStockProducerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
 @Service
 public class MovieDataService {
+
+    @Value("${kafka.realtime.topic}")
+    private String topicName;
 
     @Autowired
     private OmdbService omdbService;
@@ -20,13 +25,11 @@ public class MovieDataService {
         // Fetch data
         Map<String, Object> movieData = omdbService.getMovieOfTheYear(movie,year);
 
-        // Process data (optional, depending on your use case)
+        // Process data
         String processedData = processMovieData(movieData);
 
-        System.out.println("Sending message to Kafka: " + processedData);
-
         // Send data to Kafka
-        kafkaStockProducerService.sendStockData(movie, processedData);
+        kafkaStockProducerService.sendStockData(topicName,movie, processedData);
 
         // Return the fetched data
         return movieData;

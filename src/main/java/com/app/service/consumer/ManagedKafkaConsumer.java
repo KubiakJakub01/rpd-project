@@ -1,10 +1,12 @@
-package com.app.service;
+package com.app.service.consumer;
 
+import com.app.service.MinioService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.Collections;
@@ -18,7 +20,10 @@ public class ManagedKafkaConsumer {
     private final String topicName;
     private volatile boolean running = true;
 
-    public ManagedKafkaConsumer(@Value("${kafka.topic}") String topicName) {
+    @Autowired
+    private MinioService minioService; // Autowired MinioService
+
+    public ManagedKafkaConsumer(@Value("${kafka.realtime.topic}") String topicName) {
         this.topicName = topicName;
     }
 
@@ -47,8 +52,11 @@ public class ManagedKafkaConsumer {
             while (running) {
                 ConsumerRecords<String, String> records = consumer.poll(100);
                 for (ConsumerRecord<String, String> record : records) {
-                    System.out.printf("Consumed record with Key: %s, Value: %s, Topic: %s, Partition: %d, Offset: %d%n",
-                            record.key(), record.value(), record.topic(), record.partition(), record.offset());
+                    // Generate a unique object name for MinIO (e.g., using record offset)
+                    String objectName = "realtime-data-" + record.topic() + "-" + record.partition() + "-" + record.offset();
+
+                    // Upload the record to MinIO
+                    minioService.uploadString("windows-realtime-data", objectName, record.value());
                 }
             }
             }

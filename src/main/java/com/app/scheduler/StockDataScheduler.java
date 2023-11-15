@@ -1,36 +1,36 @@
-package com.app.config;
+package com.app.scheduler;
 
-import com.app.service.MovieDataService;
 import com.app.service.StockDataService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-
+/*
 @Component
-public class MovieDataScheduler {
+public class StockDataScheduler {
 
     @Autowired
-    private MovieDataService movieDataService;
+    private StockDataService stockDataService;
 
     private LocalDate currentDate = LocalDate.now();
 
-    @Scheduled(fixedRate = 30000) // Runs every x seconds
+    @Scheduled(fixedRate = 60000) // Runs every x seconds
     public void scheduleStockDataProcessing() {
-        String movie = "a"; // example stock symbol
+        String symbol = "AAPL"; // example stock symbol
 
         // Format the current date to get the year and month
-        String year = currentDate.format(DateTimeFormatter.ofPattern("yyyy"));
+        String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
 
         // Process and send stock data for the current month
-        movieDataService.processAndSendMovieData(movie, year);
+        stockDataService.processAndSendStockData(symbol, formattedDate);
 
         // Update the currentDate to fetch data from the previous month for the next call
-        currentDate = currentDate.minusYears(1);
+        currentDate = currentDate.minusMonths(1);
     }
 
 }
+ */
 
 

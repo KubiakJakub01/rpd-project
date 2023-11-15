@@ -1,6 +1,8 @@
 package com.app.service;
 
+import com.app.service.producer.KafkaStockProducerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -8,6 +10,9 @@ import java.util.Map;
 
 @Service
 public class StockDataService {
+
+    @Value("${alphavantage.apikey}")
+    private String topicName;
 
     @Autowired
     private AlphaVantageService alphaVantageService;
@@ -24,7 +29,7 @@ public class StockDataService {
         String processedData = processStockData(stockData);
 
         // Send data to Kafka
-        kafkaStockProducerService.sendStockData(symbol, processedData);
+        kafkaStockProducerService.sendStockData(topicName,symbol, processedData);
 
         // Return the fetched data
         return stockData;
@@ -39,7 +44,7 @@ public class StockDataService {
         String processedData = processStockData(stockData);
 
         // Send data to Kafka
-        kafkaStockProducerService.sendStockData(symbol, processedData);
+        kafkaStockProducerService.sendStockData(topicName, symbol, processedData);
 
         // Return the fetched data
         return stockData;

@@ -1,4 +1,4 @@
-package com.app.service;
+package com.app.service.producer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -10,9 +10,7 @@ public class KafkaStockProducerService {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    private final String topicName = "test_movie_topic"; // Replace with your Kafka topic
-
-    public void sendStockData(String symbol, String data) {
+    public void sendStockData(String topicName,String symbol, String data) {
         kafkaTemplate.send(topicName, symbol, data);
     }
 
