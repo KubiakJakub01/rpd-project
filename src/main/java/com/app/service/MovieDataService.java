@@ -23,6 +23,8 @@ public class MovieDataService {
         // Process data (optional, depending on your use case)
         String processedData = processMovieData(movieData);
 
+        System.out.println("Sending message to Kafka: " + processedData);
+
         // Send data to Kafka
         kafkaStockProducerService.sendStockData(movie, processedData);
 
