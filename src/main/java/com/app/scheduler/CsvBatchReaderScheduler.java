@@ -19,7 +19,7 @@ public class CsvBatchReaderScheduler {
 
     @Scheduled(fixedRate = 60000) // Runs every minute
     public void processCsvBatch() {
-        String filePath = "/stock_data/weekly_IBM.csv"; // Set your CSV file path
+        String filePath = "src/main/resources/static/weekly_IBM.csv"; // Set your CSV file path
         String symbol = extractSymbolFromFilename(filePath);
 
         try {
