@@ -29,12 +29,15 @@ public class HistoricalDataKafkaConsumer {
         this.historicalTopicName = historicalTopicName;
     }
 
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
     @PostConstruct
     public void start() {
         Properties props = new Properties();
 
         // Set the Kafka bootstrap servers
-        props.put("bootstrap.servers", "localhost:9092");
+        props.put("bootstrap.servers", bootstrapServers);
 
         // Set the consumer group id
         props.put("group.id", "csv-consumer-group");

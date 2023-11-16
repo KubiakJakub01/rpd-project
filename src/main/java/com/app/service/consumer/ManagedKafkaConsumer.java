@@ -23,6 +23,9 @@ public class ManagedKafkaConsumer {
     @Autowired
     private MinioService minioService; // Autowired MinioService
 
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
     public ManagedKafkaConsumer(@Value("${kafka.realtime.topic}") String topicName) {
         this.topicName = topicName;
     }
@@ -32,7 +35,7 @@ public class ManagedKafkaConsumer {
         Properties props = new Properties();
 
         // Set the Kafka bootstrap servers
-        props.put("bootstrap.servers", "localhost:9092");
+        props.put("bootstrap.servers", bootstrapServers);
 
         // Set the consumer group id
         props.put("group.id", "movie-consumer-group");
