@@ -86,7 +86,29 @@
 
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<kafka.bootstrap.servers>localhost:9092</kafka.bootstrap.servers>
+			</properties>
+		</profile>
+		<profile>
+			<id>docker</id>
+			<properties>
+				<kafka.bootstrap.servers>kafka:9092</kafka.bootstrap.servers>
+			</properties>
+		</profile>
+	</profiles>
+
+
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
