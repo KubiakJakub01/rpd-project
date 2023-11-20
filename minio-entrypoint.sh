@@ -13,5 +13,7 @@ done
 mc mb myminio/windows-csv-data
 mc mb myminio/windows-realtime-data
 
+echo "MinIO is ready!"
+
 # Keep container running
 wait

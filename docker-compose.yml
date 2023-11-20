@@ -32,8 +32,8 @@ services:
     command: server /data
     volumes:
       - /mnt/data:/data
-      - /home/maciek/test_docker_compose/minio-entrypoint.sh:/usr/bin/minio-entrypoint.sh
-    entrypoint: ["/usr/bin/minio-entrypoint.sh"]      
+      - ./minio-entrypoint.sh:/usr/bin/minio-entrypoint.sh
+    entrypoint: ["/usr/bin/minio-entrypoint.sh"]
     networks:
       - kafka-network
 
@@ -46,7 +46,6 @@ services:
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
-      # Add any other environment variables your app needs
     depends_on:
       - kafka
       - minio
