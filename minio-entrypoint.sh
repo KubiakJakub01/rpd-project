@@ -10,8 +10,8 @@ until mc alias set myminio http://localhost:9000 minioadmin minioadmin; do
 done
 
 # Create buckets
-mc mb myminio/windows-csv-data
-mc mb myminio/windows-realtime-data
+mc mb myminio/csv-data
+mc mb myminio/realtime-data
 
 echo "MinIO is ready!"
 

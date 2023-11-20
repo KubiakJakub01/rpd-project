@@ -62,7 +62,7 @@ public class HistoricalDataKafkaConsumer {
                     String objectName = "historical-data-" + record.topic() + "-" + record.partition() + "-" + record.offset();
                     System.out.println("consumed csv message "+objectName);
                     // Upload the record to MinIO
-                    minioService.uploadString("windows-csv-data", objectName, record.value());
+                    minioService.uploadString("csv-data", objectName, record.value());
                 }
             }
         } finally {

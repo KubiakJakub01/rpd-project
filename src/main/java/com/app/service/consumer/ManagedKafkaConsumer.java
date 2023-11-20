@@ -60,7 +60,7 @@ public class ManagedKafkaConsumer {
 
                     System.out.println("Consumed "+objectName);
                     // Upload the record to MinIO
-                    minioService.uploadString("windows-realtime-data", objectName, record.value());
+                    minioService.uploadString("realtime-data", objectName, record.value());
                 }
             }
             }
