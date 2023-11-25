@@ -3,6 +3,7 @@ target/
 **/data/*
 **/output/*
 **/__pycache__/*
+**/metadata/*
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
