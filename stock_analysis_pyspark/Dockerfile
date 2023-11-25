@@ -8,7 +8,6 @@ RUN apt-get update && \
 
 RUN mkdir -p /opt/spark/jars
 
-# Replace with the appropriate version numbers
 ENV HADOOP_AWS_VERSION=3.2.0
 ENV AWS_SDK_VERSION=1.11.375
 
@@ -16,6 +15,12 @@ RUN wget -P /opt/spark/jars/ https://repo1.maven.org/maven2/org/apache/hadoop/ha
 RUN wget -P /opt/spark/jars/ https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/$AWS_SDK_VERSION/aws-java-sdk-bundle-$AWS_SDK_VERSION.jar
 
 WORKDIR /app
-COPY ./data_preprocess.py /app
+COPY ./requirements.txt /app/requirements.txt
 
-CMD ["spark-submit", "/app/data_preprocess.py"]
+RUN pip install -r requirements.txt
+
+COPY dashboard_entypoint.sh /app/dashboard_entypoint.sh
+RUN chmod +x /app/dashboard_entypoint.sh
+COPY data_pipeline_entrypoint.sh /app/data_pipeline_entrypoint.sh
+RUN chmod +x /app/data_pipeline_entrypoint.sh
+COPY ./src /app/src
