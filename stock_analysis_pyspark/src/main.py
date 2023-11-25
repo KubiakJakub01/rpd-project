@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument(
         "--model_path",
         type=str,
-        default=os.path.join(os.getcwd(), "models", "linear_regression"),
+        default=None,
         help="Path to the model file",
     )
     parser.add_argument(
@@ -58,7 +58,7 @@ def main():
     logger.info("Creating Spark session")
     spark = SparkSession.builder \
         .appName("Stock Analysis") \
-        .config("spark.cassandra.connection.host", "cassandra-node1") \
+        .config("spark.cassandra.connection.host", "localhost") \
         .config("spark.cassandra.connection.port", "9042") \
         .getOrCreate()
 
@@ -95,8 +95,9 @@ def main():
     df = add_forecast(model, df)
 
     # Write data
-    logger.info(f"Writing data to: {args.output_path}")
-    write_data(df, args.output_path)
+    logger.info("Writing data")
+    logger.info(f"Df schema: {df.printSchema()}")
+    write_data(df, args.output_path, args.save_target)
 
     # Stop Spark session
     logger.info("Stopping Spark session")
