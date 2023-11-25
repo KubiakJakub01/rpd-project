@@ -2,11 +2,11 @@ import logging
 import os
 from typing import Literal
 
+import pandas as pd
 from cassandra.cluster import Cluster
 from pyspark.sql.functions import date_format
 from pyspark.sql.types import (
     BooleanType,
-    DataType,
     DoubleType,
     FloatType,
     IntegerType,
@@ -37,10 +37,10 @@ def load_data(spark_session, data_path):
 def write_data(df, path, target=Literal["csv", "cassandra"]):
     """Write data to csv file"""
     df = df.toDF(*[c.lower() for c in df.columns])
+    df = df.withColumn("timestamp", date_format("timestamp", "yyyy/MM/dd"))
     if target == "csv":
         logger.info(f"Saving data to {path}")
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        df = df.withColumn("timestamp", date_format("timestamp", "yyyy/MM/dd"))
         df.write.csv(path=path, mode="overwrite", header=True)
     elif target == "cassandra":
         logger.info(f"Saving data to Cassandra")
@@ -108,4 +108,23 @@ def clean_data(df, fill_strategy=Literal["drop", "zeroes", "mean"]):
         for column in ["open", "high", "low", "close", "volume"]:
             mean_value = df.select(column).agg({column: "mean"}).collect()[0][0]
             df = df.na.fill({column: mean_value})
+    return df
+
+
+def load_data_from_cassandra(hosts, keyspace, table):
+    """Load data from a Cassandra table and return a Pandas DataFrame."""
+    cluster = Cluster(contact_points=hosts)
+    session = cluster.connect(keyspace)
+
+    query = f"SELECT * FROM {table}"
+    rows = session.execute(query)
+    df = pd.DataFrame(list(rows))
+
+    # Convert timestamp column to datetime and sort
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df.sort_values(by="timestamp", inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
+    session.shutdown()
+    cluster.shutdown()
     return df

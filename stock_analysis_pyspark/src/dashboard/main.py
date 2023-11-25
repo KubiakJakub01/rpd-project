@@ -1,38 +1,47 @@
 import argparse
-import os
 
 import dash
-import pandas as pd
 import plotly.figure_factory as ff
 import plotly.graph_objs as go
 from dash import dcc, html
 from plotly.subplots import make_subplots
 
+from ..data_preprocessing import load_data_from_cassandra
 from ..feature_engineering import decompose, monthly_yearly_performance
 from ..models.time_series_model import arima_forecast, sarimax_forecast
 
 
-# Parse command line arguments
 def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--data_path",
+        "--host",
         type=str,
-        default=os.path.join(os.getcwd(), "data", "stock_prices.csv"),
-        help="Path to the data file",
+        default="localhost",
+        help="Cassandra host",
+    )
+    parser.add_argument(
+        "--keyspace",
+        type=str,
+        default="stock_analysis",
+        help="Cassandra keyspace",
+    )
+    parser.add_argument(
+        "--table",
+        type=str,
+        default="stock_prices",
+        help="Cassandra table",
     )
     args = parser.parse_args()
     return args
 
 
-# Run the app
 if __name__ == "__main__":
     # Parse command line arguments
     args = parse_args()
 
     # Load your preprocessed data
-    df = pd.read_csv(args.data_path)
+    df = load_data_from_cassandra([args.host], args.keyspace, args.table)
 
     # Initialize the Dash app
     app = dash.Dash(__name__)
@@ -89,7 +98,7 @@ if __name__ == "__main__":
     macd_fig = go.Figure(
         data=go.Bar(
             x=df["timestamp"],
-            y=df["MACD_histogram_close"],
+            y=df["macd_histogram_close"],
             marker_color="red",
             name="MACD Histogram",
         )
@@ -210,8 +219,8 @@ if __name__ == "__main__":
             "close",
             "volume",
             "rsi",
-            "MA_MACD_close",
-            "MACD_histogram_close",
+            "ma_macd_close",
+            "macd_histogram_close",
             "bollinger_bands_upper_close",
             "bollinger_bands_lower_close",
         ]
@@ -277,7 +286,6 @@ if __name__ == "__main__":
         )
     )
     forecasts_fig.update_layout(title="ARIMA Forecast")
-   
 
     # Define the layout of the app
     app.layout = html.Div(

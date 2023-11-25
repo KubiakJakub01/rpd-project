@@ -42,7 +42,9 @@ def moving_average(
     df = df.withColumn(
         f"MA_{column}",
         _mean(column).over(
-            window=Window.partitionBy("year").orderBy(sorted_by).rowsBetween(-window_size, 0)
+            window=Window.partitionBy("year")
+            .orderBy(sorted_by)
+            .rowsBetween(-window_size, 0)
         ),
     )
     return df
@@ -64,7 +66,9 @@ def relative_strength_index(df, column: str = "close", window_size=14):
     )
 
     # Calculate average gain and loss
-    window_rsi = Window.partitionBy("year").orderBy("timestamp").rowsBetween(-window_size, 0)
+    window_rsi = (
+        Window.partitionBy("year").orderBy("timestamp").rowsBetween(-window_size, 0)
+    )
     df = df.withColumn("avg_gain", F.avg(df["gain"]).over(window_rsi))
     df = df.withColumn("avg_loss", F.avg(df["loss"]).over(window_rsi))
 
@@ -138,26 +142,30 @@ def bollinger_bands(df, column: str = "close", window_size=10):
 
 def decompose(df, column: str = "close", period: int = 365):
     """Decompose time series
-    
+
     Args:
         df (pd.DataFrame): dataframe
         column (str): column name
         period (int): period of decomposition"""
-    decomposition = sm.tsa.seasonal_decompose(df[column], model='additive', period=period)
+    decomposition = sm.tsa.seasonal_decompose(
+        df[column], model="additive", period=period
+    )
     trend = decomposition.trend
     seasonal = decomposition.seasonal
     residual = decomposition.resid
-    decomposed_df = pd.concat([df['timestamp'], trend, seasonal, residual], axis=1)
-    decomposed_df.columns = ['timestamp', 'trend', 'seasonal', 'residual']
+    decomposed_df = pd.concat([df["timestamp"], trend, seasonal, residual], axis=1)
+    decomposed_df.columns = ["timestamp", "trend", "seasonal", "residual"]
     return decomposed_df
 
 
 def monthly_yearly_performance(df, column: str = "close"):
     """Calculate monthly and yearly performance"""
     # Calculate monthly performance
-    monthly_performance = df.groupby(['year', 'month']).agg({column: 'mean'}).reset_index()
+    monthly_performance = (
+        df.groupby(["year", "month"]).agg({column: "mean"}).reset_index()
+    )
 
     # Optionally, calculate yearly performance similarly
-    yearly_performance = df.groupby('year').agg({'close': 'mean'}).reset_index()
+    yearly_performance = df.groupby("year").agg({"close": "mean"}).reset_index()
 
     return monthly_performance, yearly_performance
