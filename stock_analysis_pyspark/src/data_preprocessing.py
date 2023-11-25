@@ -28,11 +28,16 @@ def load_data(spark_session, data_path):
     return spark_session.read.csv(data_path, header=True, schema=schema)
 
 
-def write_data(df, path):
+def write_data(df, path, target=Literal["csv", "cassandra"]):
     """Write data to csv file"""
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    df = df.withColumn("timestamp", date_format("timestamp", "yyyy/MM/dd"))
-    df.write.csv(path=path, mode="overwrite", header=True)
+    if target == "csv":
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        df = df.withColumn("timestamp", date_format("timestamp", "yyyy/MM/dd"))
+        df.write.csv(path=path, mode="overwrite", header=True)
+    elif target == "cassandra":
+        df.write.format("org.apache.spark.sql.cassandra").options(
+            table="stock_prices", keyspace="stock_analysis"
+        ).mode("overwrite").save()
 
 
 def clean_data(df, fill_strategy=Literal["drop", "zeroes", "mean"]):
