@@ -6,7 +6,7 @@ from pyspark.sql import SparkSession
 
 from feature_engineering import add_technical_indicators, add_time_features
 from data_preprocessing import clean_data, load_data, write_data
-from models.linear_regression import evaluate_model, train_model, add_forecast
+from models.linear_regression import train_model, add_forecast
 
 
 
@@ -35,6 +35,13 @@ def parse_args():
         default=os.path.join(os.getcwd(), "models", "linear_regression"),
         help="Path to the model file",
     )
+    parser.add_argument(
+        "--save_target",
+        type=str,
+        choices=["csv", "cassandra"],
+        default="csv",
+        help="Target to save the data",
+    )
     args = parser.parse_args()
     return args
 
@@ -49,7 +56,11 @@ def main():
 
     # Create Spark session
     logger.info("Creating Spark session")
-    spark = SparkSession.builder.appName("Stock Analysis").getOrCreate()
+    spark = SparkSession.builder \
+        .appName("Stock Analysis") \
+        .config("spark.cassandra.connection.host", "cassandra-node1") \
+        .config("spark.cassandra.connection.port", "9042") \
+        .getOrCreate()
 
     # Load data
     df = load_data(spark, args.data_path)
