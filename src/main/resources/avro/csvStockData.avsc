@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "CsvStockData",
+  "fields": [
+    {"name": "timestamp", "type": "string"},
+    {"name": "open", "type": "string"},
+    {"name": "high", "type": "string"},
+    {"name": "low", "type": "string"},
+    {"name": "close", "type": "string"},
+    {"name": "volume", "type": "string"}
+  ]
+}
