@@ -6,11 +6,13 @@ from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 
-def arima_forecast(df, column: str = "close", p: int = 5, d: int = 1, q: int = 0, step: int = 30):
+def arima_forecast(
+    df, column: str = "close", p: int = 5, d: int = 1, q: int = 0, step: int = 30
+):
     """Forecast time series using ARIMA"""
     time_series = df[["timestamp", column]]
     time_series.index = pd.DatetimeIndex(time_series["timestamp"]).to_period("W")
-    
+
     # Fit model
     model = ARIMA(time_series[column], order=(p, d, q))
     model_fit = model.fit()

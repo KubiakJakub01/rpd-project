@@ -1,14 +1,12 @@
 import argparse
-import os
 import logging
+import os
 
 from pyspark.sql import SparkSession
 
-from feature_engineering import add_technical_indicators, add_time_features
 from data_preprocessing import clean_data, load_data, write_data
-from models.linear_regression import train_model, add_forecast
-
-
+from feature_engineering import add_technical_indicators, add_time_features
+from models.linear_regression import add_forecast, train_model
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -56,11 +54,12 @@ def main():
 
     # Create Spark session
     logger.info("Creating Spark session")
-    spark = SparkSession.builder \
-        .appName("Stock Analysis") \
-        .config("spark.cassandra.connection.host", "localhost") \
-        .config("spark.cassandra.connection.port", "9042") \
+    spark = (
+        SparkSession.builder.appName("Stock Analysis")
+        .config("spark.cassandra.connection.host", "localhost")
+        .config("spark.cassandra.connection.port", "9042")
         .getOrCreate()
+    )
 
     # Load data
     df = load_data(spark, args.data_path)

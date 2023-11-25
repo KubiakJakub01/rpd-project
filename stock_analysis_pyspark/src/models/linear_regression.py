@@ -43,9 +43,7 @@ def evaluate_model(model, df):
     """Evaluate linear regression model"""
     # Evaluate the model
     evaluator = RegressionEvaluator(
-        labelCol="close",
-        predictionCol="prediction",
-        metricName="rmse"
+        labelCol="close", predictionCol="prediction", metricName="rmse"
     )
     predictions = model.transform(df)
     rmse = evaluator.evaluate(predictions)
