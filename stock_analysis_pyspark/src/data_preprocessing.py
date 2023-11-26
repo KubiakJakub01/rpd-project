@@ -171,7 +171,11 @@ def clean_data(df, fill_strategy=Literal["drop", "zeroes", "mean"]):
     return df
 
 
-def load_data_from_cassandra(hosts: str = "cassandra-node1", keyspace: str = "stock_analysis", table: str = "stock_prices"):
+def load_data_from_cassandra(
+    hosts: str = "cassandra-node1",
+    keyspace: str = "stock_analysis",
+    table: str = "stock_prices",
+):
     """Load data from a Cassandra table and return a Pandas DataFrame."""
     logger = logging.getLogger(__name__)
     logger.info(f"Connecting to Cassandra {hosts}")
@@ -179,7 +183,9 @@ def load_data_from_cassandra(hosts: str = "cassandra-node1", keyspace: str = "st
     session = cluster.connect()
 
     # Check if keyspace exists
-    keyspace_check_query = SimpleStatement(f"SELECT * FROM system_schema.keyspaces WHERE keyspace_name = '{keyspace}';")
+    keyspace_check_query = SimpleStatement(
+        f"SELECT * FROM system_schema.keyspaces WHERE keyspace_name = '{keyspace}';"
+    )
     keyspace_result = session.execute(keyspace_check_query)
     if not list(keyspace_result):
         logger.warning(f"Keyspace '{keyspace}' does not exist.")
@@ -188,7 +194,9 @@ def load_data_from_cassandra(hosts: str = "cassandra-node1", keyspace: str = "st
         return None
 
     # Check if table exists
-    table_check_query = SimpleStatement(f"SELECT * FROM system_schema.tables WHERE keyspace_name = '{keyspace}' AND table_name = '{table}';")
+    table_check_query = SimpleStatement(
+        f"SELECT * FROM system_schema.tables WHERE keyspace_name = '{keyspace}' AND table_name = '{table}';"
+    )
     table_result = session.execute(table_check_query)
     if not list(table_result):
         logger.warning(f"Table '{table}' does not exist in keyspace '{keyspace}'.")

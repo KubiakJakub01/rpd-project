@@ -44,7 +44,9 @@ def update_all_charts(n):
         return (None,) * 11
 
     return (
-        f"Number of samples loaded: {len(df.index)}" if df is not None else "No data loaded",
+        f"Number of samples loaded: {len(df.index)}"
+        if df is not None
+        else "No data loaded",
         charts.create_candlestick_chart(df),
         charts.create_rsi_chart(df),
         charts.create_macd_chart(df),
@@ -54,7 +56,7 @@ def update_all_charts(n):
         charts.create_yearly_performance_chart(df),
         charts.create_heatmap_chart(df),
         charts.create_linear_regression_chart(df),
-        charts.create_forecasts_chart(df)
+        charts.create_forecasts_chart(df),
     )
 
 
