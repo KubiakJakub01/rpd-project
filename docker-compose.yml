@@ -37,7 +37,7 @@ services:
     networks:
       - kafka-network
 
-  myapp:
+  spring-boot-app:
     image: szubidubi/rpd:parquet
     ports:
       - "8080:8080"
@@ -51,7 +51,32 @@ services:
       - minio
     networks:
       - kafka-network
+  
+  pyspark-app:
+    build: ./stock_analysis_pyspark
+    ports:
+      - "8081:8081"
+      - "8050:8050"
+    environment:
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      BUCKET_NAME: windows-csv-data
+      CASSANDRA_HOST: cassandra-node1
+      CASSANDRA_PORT: 9042
+      CASSANDRA_KEYSPACE: stock_analysis
+      CASSANDRA_TABLE: stock_prices
+    entrypoint: ["bash",  "entrypoint.sh"]
+    depends_on:
+      - kafka
+      - minio
+      - spring-boot-app
+    networks:
+      - kafka-network
+      - shared-network
 
 networks:
   kafka-network:
     driver: bridge
+  shared-network:
+    external: true
