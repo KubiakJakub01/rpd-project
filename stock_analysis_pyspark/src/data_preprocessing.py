@@ -1,10 +1,14 @@
 import logging
 import os
+import time
 from typing import Literal
 
 import pandas as pd
+from cassandra import ReadTimeout
 from cassandra.cluster import Cluster
+from cassandra.query import SimpleStatement
 from pyspark.sql.functions import date_format
+from pyspark.sql.functions import col
 from pyspark.sql.types import (
     BooleanType,
     DoubleType,
@@ -19,36 +23,60 @@ from pyspark.sql.types import (
 logger = logging.getLogger(__name__)
 
 
-def load_data(spark_session, data_path):
+def load_data(
+    spark_session, data_path: str | None = None, bucket_name: str | None = None
+):
     """Load data from csv files"""
-    schema = StructType(
-        [
-            StructField("timestamp", TimestampType(), True),
-            StructField("open", FloatType(), True),
-            StructField("high", FloatType(), True),
-            StructField("low", FloatType(), True),
-            StructField("close", FloatType(), True),
-            StructField("volume", FloatType(), True),
-        ]
-    )
-    return spark_session.read.csv(data_path, header=True, schema=schema)
+    if data_path is not None:
+        logger.info(f"Reading data from {data_path}")
+        df = spark_session.read.csv(data_path, header=True, inferSchema=True)
+    if bucket_name is not None:
+        logger.info(f"Reading data from {bucket_name}")
+        df = spark_session.read.parquet(f"s3a://{bucket_name}/*.parquet")
+
+    schema = [
+        ("timestamp", "timestamp"),
+        ("open", "float"),
+        ("high", "float"),
+        ("low", "float"),
+        ("close", "float"),
+        ("volume", "float"),
+    ]
+
+    for column_name, data_type in schema:
+        df = df.withColumn(column_name, col(column_name).cast(data_type))
+
+    return df
 
 
-def write_data(df, path, target=Literal["csv", "cassandra"]):
+def write_data(
+    df,
+    target=Literal["csv", "cassandra"],
+    path: str | None = None,
+    cassandra_host: str | None = None,
+    cassandra_port: str | None = None,
+    cassandra_keyspace: str | None = None,
+    cassandra_table: str | None = None,
+):
     """Write data to csv file"""
     df = df.toDF(*[c.lower() for c in df.columns])
     df = df.withColumn("timestamp", date_format("timestamp", "yyyy/MM/dd"))
     if target == "csv":
+        assert path is not None, "Path must be provided"
         logger.info(f"Saving data to {path}")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         df.write.csv(path=path, mode="overwrite", header=True)
     elif target == "cassandra":
-        logger.info(f"Saving data to Cassandra")
+        assert cassandra_host is not None, "Cassandra host must be provided"
+        assert cassandra_port is not None, "Cassandra port must be provided"
+        assert cassandra_keyspace is not None, "Cassandra keyspace must be provided"
+        assert cassandra_table is not None, "Cassandra table must be provided"
+        logger.info("Saving data to Cassandra")
         create_cassandra_table_from_df(
-            df, "localhost", "stock_analysis", "stock_prices"
+            df, cassandra_host, cassandra_keyspace, cassandra_table, cassandra_port
         )
         df.write.format("org.apache.spark.sql.cassandra").options(
-            table="stock_prices", keyspace="stock_analysis"
+            table=cassandra_table, keyspace=cassandra_keyspace
         ).mode("append").save()
 
 
@@ -67,8 +95,25 @@ def pyspark_to_cassandra_type(pyspark_type):
     return type_mapping.get(type(pyspark_type), "text")
 
 
-def create_cassandra_table_from_df(df, host, keyspace_name, table_name):
+def create_cassandra_table_from_df(df, host, keyspace_name, table_name, port=9042):
     """Create a Cassandra table based on the DataFrame schema."""
+    logger.info(f"Connecting to Cassandra {host}:{port}")
+    cluster = Cluster([host], port=port)
+    session = cluster.connect()
+
+    # Check if the table already exists
+    logger.info(f"Checking if table {table_name} already exists")
+    query = SimpleStatement(
+        f"SELECT * FROM system_schema.tables WHERE keyspace_name = '{keyspace_name}' AND table_name = '{table_name}';"
+    )
+    rows = session.execute(query)
+    if rows:
+        logger.info(f"Table {table_name} already exists. Skipping table creation.")
+        session.shutdown()
+        cluster.shutdown()
+        return
+
+    # Create the table schema based on the DataFrame
     schema = df.schema
     columns = [
         f"{field.name.lower()} {pyspark_to_cassandra_type(field.dataType)}"
@@ -84,12 +129,27 @@ def create_cassandra_table_from_df(df, host, keyspace_name, table_name):
 
     # Create keyspace and table
     logger.info(f"Creating Cassandra keyspace {keyspace_name} and table {table_name}")
-    cluster = Cluster([host], port=9042)
-    session = cluster.connect()
-
     session.execute(
         f"CREATE KEYSPACE IF NOT EXISTS {keyspace_name} WITH replication = {{'class': 'SimpleStrategy', 'replication_factor': 1}}"
     )
+    # Retry mechanism for setting keyspace
+    max_retries = 5
+    retry_count = 0
+    while retry_count < max_retries:
+        try:
+            session.set_keyspace(keyspace_name)
+            break
+        except ReadTimeout:
+            time.sleep(2)
+            retry_count += 1
+            logger.info(
+                f"Retry {retry_count}/{max_retries}: Waiting for keyspace to be available..."
+            )
+
+    if retry_count == max_retries:
+        cluster.shutdown()
+        raise Exception("Failed to set keyspace after maximum retries. Exiting.")
+
     session.set_keyspace(keyspace_name)
     session.execute(create_table_statement)
 

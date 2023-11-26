@@ -15,9 +15,9 @@ def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--host",
+        "--cassandra_host",
         type=str,
-        default="localhost",
+        default="cassandra-node1",
         help="Cassandra host",
     )
     parser.add_argument(
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     # Load your preprocessed data
-    df = load_data_from_cassandra([args.host], args.keyspace, args.table)
+    df = load_data_from_cassandra([args.cassandra_host], args.keyspace, args.table)
 
     # Initialize the Dash app
     app = dash.Dash(__name__)
