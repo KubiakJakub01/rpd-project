@@ -27,7 +27,7 @@ public class CsvBatchReaderScheduler {
 
     private int lastProcessedLine = 0;
 
-    @Scheduled(fixedRate = 60000) // Runs every minute
+    @Scheduled(fixedRate = 30000) // Runs every minute
     public void processCsvBatch() {
         String resourcePath = "classpath:static/weekly_IBM.csv";
         String symbol = extractSymbolFromFilename(resourcePath);
