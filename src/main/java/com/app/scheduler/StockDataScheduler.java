@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-/*
+
 @Component
 public class StockDataScheduler {
 
@@ -16,9 +16,9 @@ public class StockDataScheduler {
 
     private LocalDate currentDate = LocalDate.now();
 
-    @Scheduled(fixedRate = 60000) // Runs every x seconds
+    @Scheduled(fixedRate = 30000) // Runs every x seconds
     public void scheduleStockDataProcessing() {
-        String symbol = "AAPL"; // example stock symbol
+        String symbol = "IBM";
 
         // Format the current date to get the year and month
         String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("yyyy-MM"));
@@ -31,6 +31,5 @@ public class StockDataScheduler {
     }
 
 }
- */
 
 

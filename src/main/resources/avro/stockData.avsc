@@ -2,37 +2,12 @@
   "type": "record",
   "name": "StockData",
   "fields": [
-    {
-      "name": "MetaData",
-      "type": {
-        "type": "record",
-        "name": "MetaDataRecord",
-        "fields": [
-          {"name": "Information", "type": "string"},
-          {"name": "Symbol", "type": "string"},
-          {"name": "LastRefreshed", "type": "string"},
-          {"name": "Interval", "type": "string"},
-          {"name": "OutputSize", "type": "string"},
-          {"name": "TimeZone", "type": "string"}
-        ]
-      }
-    },
-    {
-      "name": "TimeSeries",
-      "type": {
-        "type": "map",
-        "values": {
-          "type": "record",
-          "name": "TimeSeriesRecord",
-          "fields": [
-            {"name": "open", "type": "string"},
-            {"name": "high", "type": "string"},
-            {"name": "low", "type": "string"},
-            {"name": "close", "type": "string"},
-            {"name": "volume", "type": "string"}
-          ]
-        }
-      }
-    }
+    {"name": "date", "type": "string"},
+    {"name": "open", "type": "string"},
+    {"name": "high", "type": "string"},
+    {"name": "low", "type": "string"},
+    {"name": "close", "type": "string"},
+    {"name": "volume", "type": "string"}
   ]
 }
+
