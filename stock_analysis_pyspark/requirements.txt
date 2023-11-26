@@ -1,5 +1,4 @@
 cassandra-driver==3.28.0
-coloredlogs==15.0.1
 cqlsh==6.1.2
 dash==2.14.1
 matplotlib==3.8.2

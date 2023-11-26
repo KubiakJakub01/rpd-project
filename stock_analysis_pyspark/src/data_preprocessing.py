@@ -171,11 +171,34 @@ def clean_data(df, fill_strategy=Literal["drop", "zeroes", "mean"]):
     return df
 
 
-def load_data_from_cassandra(hosts, keyspace, table):
+def load_data_from_cassandra(hosts: str = "cassandra-node1", keyspace: str = "stock_analysis", table: str = "stock_prices"):
     """Load data from a Cassandra table and return a Pandas DataFrame."""
-    cluster = Cluster(contact_points=hosts)
-    session = cluster.connect(keyspace)
+    logger = logging.getLogger(__name__)
+    logger.info(f"Connecting to Cassandra {hosts}")
+    cluster = Cluster(contact_points=[hosts])
+    session = cluster.connect()
 
+    # Check if keyspace exists
+    keyspace_check_query = SimpleStatement(f"SELECT * FROM system_schema.keyspaces WHERE keyspace_name = '{keyspace}';")
+    keyspace_result = session.execute(keyspace_check_query)
+    if not list(keyspace_result):
+        logger.warning(f"Keyspace '{keyspace}' does not exist.")
+        session.shutdown()
+        cluster.shutdown()
+        return None
+
+    # Check if table exists
+    table_check_query = SimpleStatement(f"SELECT * FROM system_schema.tables WHERE keyspace_name = '{keyspace}' AND table_name = '{table}';")
+    table_result = session.execute(table_check_query)
+    if not list(table_result):
+        logger.warning(f"Table '{table}' does not exist in keyspace '{keyspace}'.")
+        session.shutdown()
+        cluster.shutdown()
+        return None
+
+    # Proceed to load data
+    session.set_keyspace(keyspace)
+    logger.info(f"Loading data from Cassandra table {table}")
     query = f"SELECT * FROM {table}"
     rows = session.execute(query)
     df = pd.DataFrame(list(rows))
@@ -184,6 +207,7 @@ def load_data_from_cassandra(hosts, keyspace, table):
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df.sort_values(by="timestamp", inplace=True)
     df.reset_index(drop=True, inplace=True)
+    logger.info(f"Loaded {len(df.index)} rows from Cassandra")
 
     session.shutdown()
     cluster.shutdown()

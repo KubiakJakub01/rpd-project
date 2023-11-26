@@ -18,10 +18,7 @@ check_cassandra_ready() {
 check_cassandra_ready || exit 1
 
 echo "Starting Dash app"
-python -m src.dashboard.main \
-    --cassandra_host $CASSANDRA_HOST \
-    --keyspace $CASSANDRA_KEYSPACE \
-    --table $CASSANDRA_TABLE &
+python -m src.dashboard.app &
 
 while true; do
     sleep 30

@@ -1,52 +1,13 @@
-import argparse
-
-import dash
 import plotly.figure_factory as ff
 import plotly.graph_objs as go
-from dash import dcc, html
 from plotly.subplots import make_subplots
 
-from ..data_preprocessing import load_data_from_cassandra
 from ..feature_engineering import decompose, monthly_yearly_performance
 from ..models.time_series_model import arima_forecast, sarimax_forecast
 
 
-def parse_args():
-    """Parse command line arguments"""
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--cassandra_host",
-        type=str,
-        default="cassandra-node1",
-        help="Cassandra host",
-    )
-    parser.add_argument(
-        "--keyspace",
-        type=str,
-        default="stock_analysis",
-        help="Cassandra keyspace",
-    )
-    parser.add_argument(
-        "--table",
-        type=str,
-        default="stock_prices",
-        help="Cassandra table",
-    )
-    args = parser.parse_args()
-    return args
-
-
-if __name__ == "__main__":
-    # Parse command line arguments
-    args = parse_args()
-
-    # Load your preprocessed data
-    df = load_data_from_cassandra([args.cassandra_host], args.keyspace, args.table)
-
-    # Initialize the Dash app
-    app = dash.Dash(__name__)
-
-    # Create a combined Candlestick and Volume chart
+def create_candlestick_chart(df):
+    """Create a candlestick chart with volume bars"""
     candlestick_fig = make_subplots(
         rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.03, row_heights=[0.7, 0.3]
     )
@@ -67,8 +28,11 @@ if __name__ == "__main__":
     candlestick_fig.update_layout(
         title="Candlestick and Volume Chart", xaxis_rangeslider_visible=False
     )
+    return candlestick_fig
 
-    # Create an RSI chart
+
+def create_rsi_chart(df):
+    """Create a Relative Strength Index (RSI) chart"""
     rsi_fig = go.Figure(
         data=go.Scatter(x=df["timestamp"], y=df["rsi"], mode="lines", name="RSI")
     )
@@ -93,8 +57,11 @@ if __name__ == "__main__":
         annotation_position="bottom right",
     )
     rsi_fig.update_layout(title="RSI Chart", yaxis=dict(range=[0, 100]))
+    return rsi_fig
 
-    # Create a MACD Histogram chart
+
+def create_macd_chart(df):
+    """Create a Moving Average Convergence Divergence (MACD) chart"""
     macd_fig = go.Figure(
         data=go.Bar(
             x=df["timestamp"],
@@ -104,8 +71,11 @@ if __name__ == "__main__":
         )
     )
     macd_fig.update_layout(title="MACD Histogram Chart")
+    return macd_fig
 
-    # Create a Volume Trend Chart
+
+def create_volume_trend_chart(df):
+    """Create a Volume Trend chart"""
     volume_trend_fig = make_subplots(specs=[[{"secondary_y": True}]])
     volume_trend_fig.add_trace(
         go.Bar(x=df["timestamp"], y=df["volume"], name="Volume", marker_color="green"),
@@ -124,8 +94,11 @@ if __name__ == "__main__":
     volume_trend_fig.update_layout(title="Volume and Close Price Trend")
     volume_trend_fig.update_yaxes(title_text="Volume", secondary_y=False)
     volume_trend_fig.update_yaxes(title_text="Close Price", secondary_y=True)
+    return volume_trend_fig
 
-    # Create a Bollinger Bands Chart
+
+def create_bollinger_chart(df):
+    """Create a Bollinger Bands chart"""
     bollinger_fig = go.Figure()
     bollinger_fig.add_trace(
         go.Scatter(
@@ -153,9 +126,15 @@ if __name__ == "__main__":
         )
     )
     bollinger_fig.update_layout(title="Bollinger Bands Chart")
+    return bollinger_fig
 
-    # Create a Decomposition Chart
-    decomposition_df = decompose(df, column="close", period=365)
+
+def create_decomposition_chart(df):
+    """Create a Time Series Decomposition chart"""
+    try:
+        decomposition_df = decompose(df, column="close", period=365)
+    except ValueError:
+        return None
     decomposition_fig = make_subplots(
         rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.02
     )
@@ -190,8 +169,11 @@ if __name__ == "__main__":
         col=1,
     )
     decomposition_fig.update_layout(height=600, title_text="Time Series Decomposition")
+    return decomposition_fig
 
-    # Create a Monthly and Yearly Performance Chart
+
+def create_yearly_performance_chart(df):
+    """Create a Yearly Performance chart"""
     monthly_performance, yearly_performance = monthly_yearly_performance(
         df, column="close"
     )
@@ -209,8 +191,11 @@ if __name__ == "__main__":
         xaxis_title="Time",
         yaxis_title="Average Close Price",
     )
+    return yearly_performance_fig
 
-    # Create the Correlation Heatmap chart
+
+def create_heatmap_chart(df):
+    """Create a Correlation Heatmap chart"""
     correlation_matrix = df[
         [
             "open",
@@ -236,8 +221,11 @@ if __name__ == "__main__":
     heatmap_fig.update_layout(
         title="Correlation Heatmap", xaxis_title="Features", yaxis_title="Features"
     )
+    return heatmap_fig
 
-    # Plot the Linear Regression forecast from 'forecast' column
+
+def create_linear_regression_chart(df):
+    """Create a Linear Regression chart"""
     linear_regression_fig = go.Figure()
     linear_regression_fig.add_trace(
         go.Scatter(
@@ -256,8 +244,11 @@ if __name__ == "__main__":
         )
     )
     linear_regression_fig.update_layout(title="Linear Regression Chart")
+    return linear_regression_fig
 
-    # Get ARIMA and SARIMAX forecasts
+
+def create_forecasts_chart(df):
+    """Create an ARIMA and SARIMAX forecasts chart"""
     arima_predictions = arima_forecast(df)
     sarimax_predictions = sarimax_forecast(df)
     forecasts_fig = go.Figure()
@@ -286,23 +277,4 @@ if __name__ == "__main__":
         )
     )
     forecasts_fig.update_layout(title="ARIMA Forecast")
-
-    # Define the layout of the app
-    app.layout = html.Div(
-        [
-            html.H1("Stock Market Dashboard"),
-            html.Div("Interactive stock data visualization."),
-            dcc.Graph(figure=candlestick_fig),
-            dcc.Graph(figure=rsi_fig),
-            dcc.Graph(figure=macd_fig),
-            dcc.Graph(figure=volume_trend_fig),
-            dcc.Graph(figure=bollinger_fig),
-            dcc.Graph(figure=decomposition_fig),
-            dcc.Graph(figure=yearly_performance_fig),
-            dcc.Graph(figure=heatmap_fig),
-            dcc.Graph(figure=linear_regression_fig),
-            dcc.Graph(figure=forecasts_fig),
-        ]
-    )
-
-    app.run_server(debug=True)
+    return forecasts_fig
