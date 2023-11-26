@@ -21,7 +21,7 @@ echo "Starting Dash app"
 python -m src.dashboard.app &
 
 while true; do
-    sleep 30
+    sleep 45
     echo "Running the data pipeline"
     if ! spark-submit --packages com.datastax.spark:spark-cassandra-connector_2.12:$CASSANDRA_CONNECTOR_VERSION \
         src/main.py \

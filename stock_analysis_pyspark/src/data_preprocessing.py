@@ -15,8 +15,6 @@ from pyspark.sql.types import (
     FloatType,
     IntegerType,
     StringType,
-    StructField,
-    StructType,
     TimestampType,
 )
 
@@ -32,7 +30,11 @@ def load_data(
         df = spark_session.read.csv(data_path, header=True, inferSchema=True)
     if bucket_name is not None:
         logger.info(f"Reading data from {bucket_name}")
-        df = spark_session.read.parquet(f"s3a://{bucket_name}/*.parquet")
+        try:
+            df = spark_session.read.parquet(f"s3a://{bucket_name}/*.parquet")
+        except Exception:
+            logger.warning("Failed to read data from S3 bucket")
+            raise IOError("Failed to read data from S3 bucket")
 
     schema = [
         ("timestamp", "timestamp"),
