@@ -118,3 +118,24 @@ sudo docker tag rpd-spring-boot:latest szubidubi/rpd:latest
 docker login
 sudo docker push szubidubi/rpd:latest
 ```
+
+## Cleaning up
+
+Stop and remove all containers:
+```
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+```
+Remove network:
+```
+docker network rm shared-network
+```
+Remove volumes:
+```
+docker volume rm cassandra_cassandra-data1
+docker volume rm cassandra_cassandra-data2
+```
+Remove minio data:
+```
+sudo rm -rf /mnt/data/windows-*-data
+```
