@@ -1,5 +1,7 @@
 # rpd-project
-Projekt z rozproszonego przetwarzania danych / Distributed computing college project
+Distributed computing college project
+
+![Data Flow Pipeline](docs/images/data_flow_diagram.png "Data Flow Pipeline")
 
 ## Getting Started
 
@@ -26,7 +28,7 @@ cd rpd-project
 docker login
 ```
 You will need a security token from https://hub.docker.com/
-### Step 3: Run Cassandra cluster
+### Step 3: Run the Cassandra cluster
 Create a docker network:
 ```
 docker network create shared-network
