@@ -20,10 +20,23 @@ check_cassandra_ready || exit 1
 echo "Starting Dash app"
 python -m src.dashboard.app &
 
+LAST_RUN_FILE="last_run.txt"
 while true; do
-    sleep 45
+    # List files in the bucket and save to a temporary file
+    mc ls $MINIO_BUCKET > current_run.txt
+
+    # Compare with the last run (if the file exists)
+    if [ -f $LAST_RUN_FILE ]; then
+        if diff -q $LAST_RUN_FILE current_run.txt > /dev/null; then
+            echo "No new files. Skipping pipeline run."
+            sleep 30
+            continue
+        fi
+    fi
+
     echo "Running the data pipeline"
-    if ! spark-submit --packages com.datastax.spark:spark-cassandra-connector_2.12:$CASSANDRA_CONNECTOR_VERSION \
+    if ! spark-submit --master local \
+        --packages com.datastax.spark:spark-cassandra-connector_2.12:$CASSANDRA_CONNECTOR_VERSION \
         src/main.py \
         --minio_endpoint $MINIO_ENDPOINT \
         --minio_access_key $MINIO_ACCESS_KEY \
@@ -37,5 +50,9 @@ while true; do
         echo "Data pipeline failed. Exiting."
         exit 1
     fi
+
+    # Save the current state for the next run
+    mv current_run.txt $LAST_RUN_FILE
+    sleep 30
 
 done

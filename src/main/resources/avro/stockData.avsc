@@ -2,7 +2,7 @@
   "type": "record",
   "name": "StockData",
   "fields": [
-    {"name": "date", "type": "string"},
+    {"name": "timestamp", "type": "string"},
     {"name": "open", "type": "string"},
     {"name": "high", "type": "string"},
     {"name": "low", "type": "string"},
