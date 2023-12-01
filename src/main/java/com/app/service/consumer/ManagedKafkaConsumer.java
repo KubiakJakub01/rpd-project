@@ -112,7 +112,7 @@ public class ManagedKafkaConsumer {
 
 
     private void populateAvroRecord(GenericRecord avroRecord, String date, JsonNode dataNode) {
-        avroRecord.put("date", date);
+        avroRecord.put("timestamp", date);
         avroRecord.put("open", dataNode.get("1. open").asText());
         avroRecord.put("high", dataNode.get("2. high").asText());
         avroRecord.put("low", dataNode.get("3. low").asText());
