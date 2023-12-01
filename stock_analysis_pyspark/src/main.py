@@ -131,6 +131,9 @@ def main():
 
     # Load data
     df = load_data(spark, args.data_path, args.bucket_name)
+    if df is None:
+        spark.stop()
+        return -1
     logger.info("Data loaded")
     logger.info(f"Number of rows: {df.count()}")
     logger.info("Data schema:")

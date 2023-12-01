@@ -34,7 +34,7 @@ def load_data(
             df = spark_session.read.parquet(f"s3a://{bucket_name}/*.parquet")
         except Exception:
             logger.warning("Failed to read data from S3 bucket")
-            raise IOError("Failed to read data from S3 bucket")
+            return None
 
     schema = [
         ("timestamp", "timestamp"),
