@@ -11,6 +11,7 @@ public class KafkaStockProducerService {
     private KafkaTemplate<String, String> kafkaTemplate;
 
     public void sendStockData(String topicName,String symbol, String data) {
+        System.out.println("Producer written to realtime msg: "+data);
         kafkaTemplate.send(topicName, symbol, data);
     }
 

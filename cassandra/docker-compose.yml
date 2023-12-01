@@ -1,0 +1,44 @@
+version: '3'
+services:
+  cassandra-node1:
+    image: cassandra:latest
+    container_name: cassandra-node1
+    environment:
+      - CASSANDRA_CLUSTER_NAME=TestCluster1
+      - CASSANDRA_DC=DC1
+      - CASSANDRA_RACK=RAC1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    volumes:
+      - cassandra-data1:/var/lib/cassandra
+    networks:
+      - cassandra-net
+      - shared-network
+    ports:
+      - "9042:9042"
+
+  cassandra-node2:
+    image: cassandra:latest
+    container_name: cassandra-node2
+    depends_on:
+      - cassandra-node1
+    environment:
+      - CASSANDRA_SEEDS=cassandra-node1
+      - CASSANDRA_CLUSTER_NAME=TestCluster1
+      - CASSANDRA_DC=DC1
+      - CASSANDRA_RACK=RAC1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    volumes:
+      - cassandra-data2:/var/lib/cassandra
+    networks:
+      - cassandra-net
+      - shared-network
+
+networks:
+  cassandra-net:
+    driver: bridge
+  shared-network:
+    external: true
+
+volumes:
+  cassandra-data1:
+  cassandra-data2:

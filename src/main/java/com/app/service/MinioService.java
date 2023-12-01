@@ -6,8 +6,7 @@ import io.minio.errors.MinioException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -45,5 +44,22 @@ public class MinioService {
             System.out.println("Error occurred: " + e);
         }
     }
+
+    public void uploadFile(String bucketName, String objectName, File file) {
+        // Logic to upload a file to MinIO
+        try (InputStream is = new FileInputStream(file)) {
+            PutObjectArgs args = PutObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(objectName)
+                    .stream(is, file.length(), -1)
+                    .contentType("application/octet-stream")
+                    .build();
+            minioClient.putObject(args);
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading file to MinIO", e);
+        }
+    }
+
+
 }
 

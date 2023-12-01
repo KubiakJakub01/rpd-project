@@ -1,5 +1,7 @@
 # rpd-project
-Projekt z rozproszonego przetwarzania danych / Distributed computing college project
+Distributed computing college project
+
+![Data Flow Pipeline](docs/images/data_flow_diagram.png "Data Flow Pipeline")
 
 ## Getting Started
 
@@ -12,6 +14,7 @@ To get started with this project, follow the instructions below.
 - Git
 - Maven
 - Java JDK (Java 17)
+- Python (3.10)
 
 ## Running the app
 
@@ -20,30 +23,44 @@ To get started with this project, follow the instructions below.
 git clone https://github.com/KubiakJakub01/rpd-project.git
 cd rpd-project
 ```
-### Step 2: Switch to producer branch
-```
-git checkout producer
-```
-### Step 3: Docker Hub Login
+### Step 2: Docker Hub Login
 ```
 docker login
 ```
 You will need a security token from https://hub.docker.com/
-### Step 4: Set Up MinIO Entrypoint Script
-Update the path to minio-entrypoint.sh in docker-compose.yml, you need to give the exact path to a directory on your local host where minio-entrypoint.sh is located,change this:
+### Step 3: Run the Cassandra cluster
+Create a docker network:
 ```
-- /home/maciek/test_docker_compose/minio-entrypoint.sh:/usr/bin/minio-entrypoint.sh
+docker network create shared-network
 ```
-to 
+Run Cassandra cluster:
 ```
-- /your_path/minio-entrypoint.sh:/usr/bin/minio-entrypoint.sh
+cd cassandra && docker compose up -d
 ```
-### Step 5: Run Docker Compose
+It will run 2 Cassandra nodes, one seed node and one regular node. You can check if the cluster is running correctly by running:
 ```
-docker-compose up
+docker exec -it cassandra-node1 nodetool status
 ```
+
+### Step 4: Run app
+```
+docker compose up -d
+```
+The above command launches 5 docker containers:
+- 1 Spring Boot app
+- 1 MinIO server
+- 1 Kafka broker
+- 1 Zookeeper server
+- 1 PySpark pipeline and DashBoard app
+  
+If all services have started correctly you should be able to access the:
+- Dashboard app at http://0.0.0.0:8050
+- MinIO server at http://172.25.0.2:9000
+- PySpark pipeline at http://0.0.0.0:4040
+
+
 ## Verifying Data in MinIO using MinIO Client (mc)
-To check if the data is being saved correctly in MinIO, you can use the MinIO Client (mc). If you run docker-compose in a regular way, you can run commands below in another terminal, or you can run docker-compose in background:
+To check if the data is being saved correctly in MinIO, you can use the MinIO Client (mc). If you regularly run docker-compose, you can run the commands below in another terminal, or you can run docker-compose in the background:
 ```
 docker-compose up -d
 ```
@@ -102,6 +119,23 @@ docker login
 sudo docker push szubidubi/rpd:latest
 ```
 
+## Cleaning up
 
-
-
+Stop and remove all containers:
+```
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
+```
+Remove network:
+```
+docker network rm shared-network
+```
+Remove volumes:
+```
+docker volume rm cassandra_cassandra-data1
+docker volume rm cassandra_cassandra-data2
+```
+Remove minio data:
+```
+sudo rm -rf /mnt/data/windows-*-data
+```

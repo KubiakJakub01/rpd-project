@@ -29,6 +29,7 @@ public class AlphaVantageService {
                 "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=%s&apikey=%s&" +
                         "interval=60min&month=%s",
                 symbol, apiKey,month);
+        System.out.println(url);
         return restTemplate.getForObject(url, Map.class);
     }
 

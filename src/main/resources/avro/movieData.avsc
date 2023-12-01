@@ -1,0 +1,44 @@
+{
+  "type": "record",
+  "name": "MovieData",
+  "fields": [
+    {"name": "Title", "type": "string"},
+    {"name": "Year", "type": "string"},
+    {"name": "Rated", "type": "string"},
+    {"name": "Released", "type": "string"},
+    {"name": "Runtime", "type": "string"},
+    {"name": "Genre", "type": "string"},
+    {"name": "Director", "type": "string"},
+    {"name": "Writer", "type": "string"},
+    {"name": "Actors", "type": "string"},
+    {"name": "Plot", "type": "string"},
+    {"name": "Language", "type": "string"},
+    {"name": "Country", "type": "string"},
+    {"name": "Awards", "type": "string"},
+    {"name": "Poster", "type": "string"},
+    {
+      "name": "Ratings",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "Rating",
+          "fields": [
+            {"name": "Source", "type": "string"},
+            {"name": "Value", "type": "string"}
+          ]
+        }
+      }
+    },
+    {"name": "Metascore", "type": "string"},
+    {"name": "imdbRating", "type": "string"},
+    {"name": "imdbVotes", "type": "string"},
+    {"name": "imdbID", "type": "string"},
+    {"name": "Type", "type": "string"},
+    {"name": "DVD", "type": "string"},
+    {"name": "BoxOffice", "type": "string"},
+    {"name": "Production", "type": "string"},
+    {"name": "Website", "type": "string"},
+    {"name": "Response", "type": "string"}
+  ]
+}

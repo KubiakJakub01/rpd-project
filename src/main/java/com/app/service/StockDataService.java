@@ -1,6 +1,7 @@
 package com.app.service;
 
 import com.app.service.producer.KafkaStockProducerService;
+import org.apache.hadoop.security.SaslOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ import java.util.Map;
 @Service
 public class StockDataService {
 
-    @Value("${alphavantage.apikey}")
+    @Value("${kafka.realtime.topic}")
     private String topicName;
 
     @Autowired
@@ -39,7 +40,6 @@ public class StockDataService {
     public Map<String, Object> processAndSendStockData(String symbol,String month) {
         // Fetch data
         Map<String, Object> stockData = alphaVantageService.getDailyTimeSeries(symbol,month);
-
         // Process data (optional, depending on your use case)
         String processedData = processStockData(stockData);
 
